@@ -12,5 +12,26 @@
     <input type="text" name="quantity" id="quantity" placeholder="quantity"><br>
     <button type="submit">Add</button>
   </form>
+  <!-- to show the  product -->
+  <div id="productshow">
+
+
+  </div>
+
+
+  <script>
+    fetch("http://localhost:3000/product")
+    .then(res => res.json())
+    .then(result => {
+      console.log(result);
+     const container=document.getElementById("productshow");
+     result.forEach(element => {
+      const pitem=document.createElement("p");
+      pitem.innerHTML=`Name:${element.pdname} price: ${element.pdprice} Quantity: ${element.quantity}`;
+      container.appendChild(pitem);
+     });
+
+    })
+  </script>
 </body>
 </html>
