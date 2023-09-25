@@ -1,50 +1,115 @@
-var express = require('express')
-var app = express();
-var bodyParser = require('body-parser');
-var cors = require('cors');
+// const express = require('express');
+// const app = express();
+// const {MongoClient,ServerApiVersion} = require('mongodb');
+// const bodyParser = require('body-parser');
+// const cors = require('cors');
+// const password = 'BfYFTrHtjFZ79ip7';
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(cors());
+
+
+// const uri = "mongodb+srv://rabbi443418:BfYFTrHtjFZ79ip7@testermongo.fea0flo.mongodb.net/?retryWrites=true&w=majority";
+// const client = new MongoClient(uri, { 
+//   serverApi: {
+//     version: ServerApiVersion.v1,
+//     strict: true,
+//     deprecationErrors: true,
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true
+// },
+//   });
+
+
+
+// app.get('/', (req, res) => {
+//   res.sendFile(__dirname + "/index.html");
+// });
+
+
+
+// client.connect(err => {
+//   const collection = client.db("organicdata").collection("product");
+//   // perform actions on the collection object
+//   app.post('/addproduct', function (req, res) {
+//     const productitem = req.body;
+//     collection.insertOne(productitem)
+//     .then(result => {
+//       console.log("One product added");
+//   });
+        
+// });
+  
+//   console.log("database connected");
+
+// });
+
+
+// app.listen(3000);
+
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
+
 const uri = "mongodb+srv://rabbi443418:BfYFTrHtjFZ79ip7@testermongo.fea0flo.mongodb.net/?retryWrites=true&w=majority";
-app.use(bodyParser.json());
+
 app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + "/index.html");
+});
 
-app.get('/',  (req, res)=> {
-    res.sendFile(__dirname+"/index.html");
-  })
-
-
-  const client = new MongoClient(uri, {
+const client = new MongoClient(uri, {
     serverApi: {
-      version: ServerApiVersion.v1,
-      strict: true,
-      deprecationErrors: true,
-    }
-  });
-  async function run() {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    },
+});
+
+async function run() {
     try {
-      // Connect the client to the server	(optional starting in v4.7)
-      await client.connect();
-      // Send a ping to confirm a successful connection
-      const db = client.db("organicdata");
-      const col = db.collection("product");
-    //  const collectonDandC= await client.db().collection(); 
-    //     //command({ ping: 1 });
+        await client.connect();
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        const db = client.db("organicdata");
+        const col1 = db.collection("product");
 
-      let product={name:"Oill",price:23,quatity:40,
-      "contribs": [ "Turing machine", "Turing test", "Turingery" ],
-      "views": 1250000}
-      const p = await col.insertOne(product)
-      .then(res=>{
-        console.log("one added");
-      });
+        // Read data
+        app.get('/product', async (req, res) => {
+            try {
+                const documents = await col1.find({}).toArray();
+                res.send(documents);
+            } catch (err) {
+                console.error("Error reading products:", err);
+                res.status(500).send("Internal server error");
+            }
+        });
 
-      console.log("Pinged your deployment. You successfully connected to MongoDB!");
-     
-    } 
-    finally {
-      // Ensures that the client will close when you finish/error
-      await client.close();
+        // Insert to MongoDB
+        app.post('/addproduct', (req, res) => {
+            const productitem = req.body;
+            col1.insertOne(productitem)
+                .then(result => {
+                    console.log("Product added");
+                    res.send("Product added successfully");
+                })
+                .catch(err => {
+                    console.error("Error adding product:", err);
+                    res.status(500).send("Internal server error");
+                });
+        });
+    } finally {
+        // Close the MongoDB client when it's no longer needed
+        // await client.close();
     }
-  }
-  run().catch(console.dir);
-app.listen(3000);
+}
+
+run().catch(console.dir);
+
+app.listen(3000, () => {
+    console.log('Server is running on port 3000');
+});
