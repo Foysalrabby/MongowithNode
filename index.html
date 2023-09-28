@@ -10,6 +10,7 @@
     <input type="text" name="pdname" id="pdname" placeholder="name"><br>
     <input type="text" name="pdprice" id="pdprice" placeholder="price"><br>
     <input type="text" name="quantity" id="quantity" placeholder="quantity"><br>
+   
     <button type="submit">Add</button>
   </form>
   <!-- to show the  product -->
@@ -17,8 +18,11 @@
 
 
   </div>
+<!-- to show update data -->
+<div id="productupdate">
 
 
+</div>
   <script>
     fetch("http://localhost:3000/product")
     .then(res => res.json())
@@ -27,11 +31,75 @@
      const container=document.getElementById("productshow");
      result.forEach(element => {
       const pitem=document.createElement("p");
-      pitem.innerHTML=`Name:${element.pdname} price: ${element.pdprice} Quantity: ${element.quantity}`;
+      pitem.innerHTML=`Name:${element.pdname} price: ${element.pdprice} Quantity: ${element.quantity}
+      <button onclick="updateproduct('${element._id}')">update</button>
+      <button onclick="deleproduct(event,'${element._id}')">delete</button>
+      `;
       container.appendChild(pitem);
      });
 
     })
+
+  
+    
+
+    //update product
+
+    function updateproduct(id){
+      //console.log(id);
+      fetch(`/updatedata/${id}`)
+      .then(res=>res.json())
+      .then(result =>{
+         //console.log(result);
+      const containerupdate=document.getElementById("productupdate");
+      const item=document.createElement("p");
+      item.innerHTML=`<h3>updating</h3>
+      <input type="text" value="${result.pdprice}" id="price" ><br>
+      <input type="text" value="${result.quantity}" id="quantityies" ><br>
+      <button onclick="updateConform('${result._id}')" type="submit">Update</button>
+      
+      `;
+      containerupdate.appendChild(item);
+
+      })
+    }
+
+   //update push to monghodb bvvvvv  
+ 
+    function updateConform(id){
+     //console.log(id);
+     const price=document.getElementById("price").value;
+     const quantityes=document.getElementById("quantityies").value;
+     const product={id,price,quantityes}
+     console.log(product);
+     fetch(`/updatedata/${id}`,{
+      method: 'PATCH',
+      headers: {
+
+    'Content-Type': 'application/json'
+      },                                                           
+     body: JSON.stringify(product)
+   }).then(res => res.json())
+   .then(result =>{console.log("update data succefully")} )
+
+    }
+
+
+  //delete product
+    function  deleproduct(event,id){
+       console.log(event.target.parentNode);
+      fetch(`/deletedata/${id}`,{
+        method: 'DELETE'
+      })
+      .then(res=>res.json())
+      .then(result =>{
+        if(result){
+          event.target.parentNode.style.display = "none";
+          
+        }
+        // console.log("delete successfull ");
+      })
+    }
   </script>
 </body>
 </html>
